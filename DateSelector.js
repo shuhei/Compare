@@ -10,9 +10,8 @@ import {
 
 const WIDTH = 320;
 
-function formatTime(timestamp: number): string {
-  const d = new Date(timestamp * 1000);
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+function formatTime(date: Date): string {
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
 function times(n: number): Array<number> {
@@ -23,34 +22,37 @@ function times(n: number): Array<number> {
   return arr;
 }
 
-function onScroll(onChange) {
+type ChangeHandler = (date: Date) => void;
+
+function onScroll(onChange: ChangeHandler, candidates: Array<Date>) {
   return event => {
     const offset = event.nativeEvent.contentOffset.x;
     const index = Math.floor(offset / 320);
-    onChange(index);
+    // TODO: Call only when the index changes.
+    onChange(candidates[index]);
   };
 }
 
 type Props = {
-  timestamp: number,
-  onChange: any
+  candidates: Array<Date>,
+  onChange: ChangeHandler
 };
 
-export function DateSelector({ timestamp, onChange }: Props) {
-  const texts = times(3).map(i => (
-    <Text key={i} style={[styles.text]}>{formatTime(timestamp)}</Text>
+export function DateSelector({ candidates, onChange }: Props) {
+  const texts = candidates.map((date, i) => (
+    <Text key={i} style={[styles.text]}>{formatTime(date)}</Text>
   ));
   return <View style={[styles.container]}>
     <ScrollView
       // https://github.com/facebook/react-native/issues/2251
-      onMomentumScrollEnd={onScroll(onChange)}
+      onMomentumScrollEnd={onScroll(onChange, candidates)}
       horizontal={true}
       pagingEnabled={true}
       showsHorizontalScrollIndicator={false}
       style={[styles.scroll]}
       scrollEventThrottle={100}
       alwaysBoundHorizontal={false}
-      >
+    >
       {texts}
     </ScrollView>
   </View>;

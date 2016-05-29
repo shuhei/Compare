@@ -9,21 +9,21 @@ import {
 } from 'react-native';
 
 type Props = {
-  yesterday: Array<Object>,
-  today: Array<Object>,
+  past: Array<Object>,
+  future: Array<Object>,
   style: Object
 };
 
-export function HourlyChart({ yesterday, today, style }: Props) {
-  const hours = yesterday.slice(0, 24).map((h, i) => {
+export function HourlyChart({ past, future, style }: Props) {
+  const hours = past.slice(0, 24).map((h, i) => {
     const yh = Math.round((h.temperature - 50) * 4);
-    const th = Math.round((today[i].temperature - 50) * 4);
+    const th = Math.round((future[i].temperature - 50) * 4);
     return <View key={h.time} style={[styles.barBox]}>
       <View style={[styles.bar, styles.barYesterday, { height: yh }]} />
       <View style={[styles.bar, styles.barToday, { height: th }]} />
     </View>;
   });
-  const texts = yesterday.slice(0, 12).map((h, i) => (
+  const texts = past.slice(0, 12).map((h, i) => (
     <Text key={i} style={[styles.barText]}>{i * 2}</Text>
   ));
   return <View style={style}>
