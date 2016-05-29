@@ -7,11 +7,22 @@ import {
   Text,
   View
 } from 'react-native';
+import format from 'date-fns/format';
+import differenceInDays from 'date-fns/difference_in_days';
 
 const WIDTH = 320;
 
-function formatTime(date: Date): string {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+function formatDate(date: Date, today: Date): string {
+  switch (differenceInDays(date, today)) {
+    case 0:
+      return 'Today';
+    case 1:
+      return 'Tomorrow';
+    case -1:
+      return 'Yesterday';
+    default:
+      return format(date, 'ddd, MMM D, YYYY');
+  }
 }
 
 function times(n: number): Array<number> {
@@ -35,12 +46,13 @@ function onScroll(onChange: ChangeHandler, candidates: Array<Date>) {
 
 type Props = {
   candidates: Array<Date>,
-  onChange: ChangeHandler
+  onChange: ChangeHandler,
+  today: Date
 };
 
-export function DateSelector({ candidates, onChange }: Props) {
+export function DateSelector({ candidates, onChange, today }: Props) {
   const texts = candidates.map((date, i) => (
-    <Text key={i} style={[styles.text]}>{formatTime(date)}</Text>
+    <Text key={i} style={[styles.text]}>{formatDate(date, today)}</Text>
   ));
   return <View style={[styles.container]}>
     <ScrollView

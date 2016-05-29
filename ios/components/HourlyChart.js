@@ -8,10 +8,12 @@ import {
   View
 } from 'react-native';
 
+import { Forecast } from '../../types';
+
 type Props = {
-  past: Array<Object>,
-  future: Array<Object>,
-  style: Object
+  past: Array<Forecast>,
+  future: Array<Forecast>,
+  style: StyleSheet
 };
 
 export function HourlyChart({ past, future, style }: Props) {
@@ -26,45 +28,46 @@ export function HourlyChart({ past, future, style }: Props) {
   const texts = past.slice(0, 12).map((h, i) => (
     <Text key={i} style={[styles.barText]}>{i * 2}</Text>
   ));
-  return <View style={style}>
+  return <View style={[style, styles.container]}>
     <View style={styles.chartItems}>{hours}</View>
     <View style={styles.chartItems}>{texts}</View>
   </View>;
 }
 
 const styles = StyleSheet.create({
+  container: {
+    height: 150,
+    justifyContent: 'flex-end'
+  },
   chartItems: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'flex-end',
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   barBox: {
     width: 10,
-    marginHorizontal: 1,
-    flex: 1,
+    marginHorizontal: 2,
     alignItems: 'flex-end',
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   barText: {
     textAlign: 'center',
     marginTop: 4,
     marginLeft: -5,
     marginRight: 9,
-    width: 22,
+    width: 24,
     fontWeight: 'bold',
-    color: '#ff666688'
+    color: '#ff666688',
   },
   bar: {
     width: 10,
     borderTopLeftRadius: 5,
-    borderTopRightRadius: 5
+    borderTopRightRadius: 5,
   },
   barYesterday: {
-    backgroundColor: '#ccddccff'
+    backgroundColor: '#bbccbbff',
   },
   barToday: {
     backgroundColor: '#ff666688',
-    marginLeft: -10
+    marginLeft: -10,
   }
 });

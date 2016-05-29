@@ -1,8 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
+/* @flow */
 
 import React, { Component } from 'react';
 import {
@@ -16,12 +12,9 @@ import startOfDay from 'date-fns/start_of_day';
 import addDays from 'date-fns/add_days';
 import subDays from 'date-fns/sub_days';
 
-import { DateSelector } from './DateSelector';
-import { HourlyChart } from './HourlyChart';
-
-import sample from './sample.json';
-import sampleToday from './sample-today.json';
-import sampleYesterday from './sample-yesterday.json';
+import { DateSelector } from './ios/components/DateSelector';
+import { HourlyChart } from './ios/components/HourlyChart';
+import { Forecast } from './types';
 
 const LAT = 35.699069;
 const LNG = 139.7728588;
@@ -32,14 +25,14 @@ function weatherUrl(lat: number, lng: number, date: Date): string {
   return `https://api.forecast.io/forecast/${API_KEY}/${lat},${lng},${timestamp}`;
 }
 
-function fetchWeather(date): Promise<Array<Object>> {
+function fetchWeather(date): Promise<Array<Forecast>> {
   const url = weatherUrl(LAT, LNG, date);
   return fetch(url)
     .then(res => res.json())
     .then(d => d.hourly.data);
 }
 
-function emptyWeather() {
+function emptyWeather(): Array<Forecast> {
   const weather = new Array(24);
   for (let i = 0; i < 24; i++) {
     weather[i] = {
@@ -50,7 +43,17 @@ function emptyWeather() {
   return weather;
 }
 
-class Compare extends Component<void, {}, any> {
+class Compare extends Component {
+  state: {
+    ratio: Animated.Value,
+    pastCandidates: Array<Date>,
+    futureCandidates: Array<Date>,
+    past: Date,
+    future: Date,
+    pastWeather: Array<Forecast>,
+    futureWeather: Array<Forecast>
+  };
+
   constructor() {
     super();
     const today = startOfDay(new Date());
@@ -58,8 +61,8 @@ class Compare extends Component<void, {}, any> {
     this.state = {
       ratio: new Animated.Value(100),
 
-      pastCandidates: [yesterday],
-      futureCandiates: [today, addDays(today, 1), addDays(today, 2), addDays(today, 3)],
+      pastCandidates: [yesterday, today],
+      futureCandidates: [today, addDays(today, 1), addDays(today, 2), addDays(today, 3)],
 
       past: yesterday,
       future: today,
@@ -109,20 +112,23 @@ class Compare extends Component<void, {}, any> {
   }
 
   render() {
+    const today = startOfDay(new Date());
     return (
       <View style={styles.container}>
         <HourlyChart
           past={this.state.pastWeather}
           future={this.state.futureWeather}
-          style={[{ marginBottom: 20 }]}
+          style={{ marginBottom: 20 }}
         />
         <DateSelector
           candidates={this.state.pastCandidates}
           onChange={this.onPastChange.bind(this)}
+          today={today}
         />
         <DateSelector
-          candidates={this.state.futureCandiates}
+          candidates={this.state.futureCandidates}
           onChange={this.onFutureChange.bind(this)}
+          today={today}
         />
       </View>
     );
