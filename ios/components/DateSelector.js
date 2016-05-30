@@ -47,12 +47,15 @@ function onScroll(onChange: ChangeHandler, candidates: Array<Date>) {
 type Props = {
   candidates: Array<Date>,
   onChange: ChangeHandler,
-  today: Date
+  today: Date,
+  textStyle: Object
 };
 
-export function DateSelector({ candidates, onChange, today }: Props) {
-  const texts = candidates.map((date, i) => (
-    <Text key={i} style={[styles.text]}>{formatDate(date, today)}</Text>
+export function DateSelector({ candidates, onChange, today, textStyle }: Props) {
+  const items = candidates.map((date, i) => (
+    <View key={i} style={[styles.item]}>
+      <Text style={[styles.text, textStyle]}>{formatDate(date, today)}</Text>
+    </View>
   ));
   return <View style={[styles.container]}>
     <ScrollView
@@ -65,7 +68,7 @@ export function DateSelector({ candidates, onChange, today }: Props) {
       scrollEventThrottle={100}
       alwaysBoundHorizontal={false}
     >
-      {texts}
+      {items}
     </ScrollView>
   </View>;
 }
@@ -73,11 +76,15 @@ export function DateSelector({ candidates, onChange, today }: Props) {
 const styles = StyleSheet.create({
   container: {
   },
-  text: {
+  item: {
     width: WIDTH,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  text: {
     textAlign: 'center',
-    paddingVertical: 20,
-    color: '#889988ff',
+    paddingVertical: 12,
     fontSize: 22
   },
   scroll: {

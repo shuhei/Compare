@@ -61,7 +61,9 @@ export class HourlyChart extends Component {
 
   springForecasts(from: Array<AnimatedForecast>, to: Array<Forecast>) {
     const springs = from.map((forecast, i) => Animated.spring(forecast.temperature, {
-      toValue: this.calcHeight(to[i].temperature)
+      toValue: this.calcHeight(to[i].temperature),
+      friction: 3,
+      tension: 20
     }));
     return Animated.parallel(springs);
   }
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     marginRight: 9,
     width: 24,
     fontWeight: 'bold',
-    color: '#ff666688',
+    color: '#99999988',
   },
   bar: {
     width: 10,

@@ -58,11 +58,12 @@ class Compare extends Component {
     super();
     const today = startOfDay(new Date());
     const yesterday = subDays(today, 1);
+    const futureDates = Array(7).fill().map((_, i) => addDays(today, i));
     this.state = {
       ratio: new Animated.Value(100),
 
       pastCandidates: [yesterday, today],
-      futureCandidates: [today, addDays(today, 1), addDays(today, 2), addDays(today, 3)],
+      futureCandidates: futureDates,
 
       past: yesterday,
       future: today,
@@ -118,18 +119,23 @@ class Compare extends Component {
         <HourlyChart
           past={this.state.pastWeather}
           future={this.state.futureWeather}
-          style={{ marginBottom: 20 }}
+          style={{ marginBottom: 40 }}
         />
-        <DateSelector
-          candidates={this.state.pastCandidates}
-          onChange={this.onPastChange.bind(this)}
-          today={today}
-        />
-        <DateSelector
-          candidates={this.state.futureCandidates}
-          onChange={this.onFutureChange.bind(this)}
-          today={today}
-        />
+        <View style={styles.selectors}>
+          <DateSelector
+            candidates={this.state.futureCandidates}
+            onChange={this.onFutureChange.bind(this)}
+            today={today}
+            textStyle={{ color: '#ff6666cc' }}
+          />
+          <Text style={[styles.vs]}>×</Text>
+          <DateSelector
+            candidates={this.state.pastCandidates}
+            onChange={this.onPastChange.bind(this)}
+            today={today}
+            textStyle={{ color: '#889988dd' }}
+          />
+        </View>
       </View>
     );
   }
@@ -142,6 +148,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCCC',
+  },
+  vs: {
+    color: '#88998899',
+    fontSize: 20
+  },
+  selectors: {
+    alignItems  : 'center'
   }
 });
 
