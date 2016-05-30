@@ -1,5 +1,5 @@
 /* @flow */
-import React from 'react';
+import React, { Component } from 'react';
 import {
   StyleSheet,
   Animated,
@@ -16,13 +16,75 @@ type Props = {
   style: StyleSheet
 };
 
-export function HourlyChart({ past, future, style }: Props) {
-  const hours = past.slice(0, 24).map((h, i) => {
-    const yh = Math.round((h.temperature - 50) * 4);
-    const th = Math.round((future[i].temperature - 50) * 4);
-    return <View key={h.time} style={[styles.barBox]}>
-      <View style={[styles.bar, styles.barYesterday, { height: yh }]} />
-      <View style={[styles.bar, styles.barToday, { height: th }]} />
+type AnimatedForecast = {
+  time: number,
+  temperature: Animated.Value
+};
+
+type AnimatedProps = {
+  past: Array<AnimatedForecast>,
+  future: Array<AnimatedForecast>,
+  style: StyleSheet
+};
+
+export class HourlyChart extends Component {
+  props: Props;
+  state: {
+    past: Array<AnimatedForecast>,
+    future: Array<AnimatedForecast>
+  };
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      past: props.past.map(f => this.animateForecast(f)),
+      future: props.future.map(f => this.animateForecast(f))
+    };
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (this.props.past !== nextProps.past) {
+      this.springForecasts(this.state.past, nextProps.past).start();
+    }
+    if (this.props.future !== nextProps.future) {
+      this.springForecasts(this.state.future, nextProps.future).start();
+    }
+  }
+
+  render() {
+    return <AnimatedHourlyChart
+      past={this.state.past}
+      future={this.state.future}
+      style={this.props.style}
+    />;
+  }
+
+  springForecasts(from: Array<AnimatedForecast>, to: Array<Forecast>) {
+    const springs = from.map((forecast, i) => Animated.spring(forecast.temperature, {
+      toValue: this.calcHeight(to[i].temperature)
+    }));
+    return Animated.parallel(springs);
+  }
+
+  animateForecast(forecast: Forecast): AnimatedForecast {
+    return {
+      time: forecast.time,
+      temperature: new Animated.Value(this.calcHeight(forecast.temperature))
+    };
+  }
+
+  calcHeight(temperature: number) {
+    // TODO: Math.round??
+    return (temperature - 50) * 4;
+  }
+}
+
+function AnimatedHourlyChart({ past, future, style }: AnimatedProps) {
+  const hours = past.slice(0, 24).map((p, i) => {
+    const f = future[i];
+    return <View key={i} style={[styles.barBox]}>
+      <Animated.View style={[styles.bar, styles.barPast, { height: p.temperature }]} />
+      <Animated.View style={[styles.bar, styles.barFuture, { height: f.temperature }]} />
     </View>;
   });
   const texts = past.slice(0, 12).map((h, i) => (
@@ -63,10 +125,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
   },
-  barYesterday: {
+  barPast: {
     backgroundColor: '#bbccbbff',
   },
-  barToday: {
+  barFuture: {
     backgroundColor: '#ff666688',
     marginLeft: -10,
   }
