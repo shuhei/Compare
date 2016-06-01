@@ -25,11 +25,10 @@ function weatherUrl(lat: number, lng: number, date: Date): string {
   return `https://api.forecast.io/forecast/${API_KEY}/${lat},${lng},${timestamp}`;
 }
 
-function fetchWeather(date): Promise<Array<Forecast>> {
+function fetchWeather(date): Promise<{ daily: any, hourly: { data: Array<Forecast> } }> {
   const url = weatherUrl(LAT, LNG, date);
   return fetch(url)
-    .then(res => res.json())
-    .then(d => d.hourly.data);
+    .then(res => res.json());
 }
 
 function emptyWeather(): Array<Forecast> {
@@ -45,7 +44,7 @@ function emptyWeather(): Array<Forecast> {
 
 class Compare extends Component {
   state: {
-    ratio: Animated.Value,
+    weather: any,
     pastCandidates: Array<Date>,
     futureCandidates: Array<Date>,
     past: Date,
@@ -56,11 +55,13 @@ class Compare extends Component {
 
   constructor() {
     super();
+
     const today = startOfDay(new Date());
     const yesterday = subDays(today, 1);
     const futureDates = Array(7).fill().map((_, i) => addDays(today, i));
+
     this.state = {
-      ratio: new Animated.Value(100),
+      weather: null,
 
       pastCandidates: [yesterday, today],
       futureCandidates: futureDates,
@@ -69,7 +70,7 @@ class Compare extends Component {
       future: today,
 
       pastWeather: emptyWeather(),
-      futureWeather: emptyWeather(),
+      futureWeather: emptyWeather()
     };
   }
 
@@ -100,26 +101,32 @@ class Compare extends Component {
 
   fetchFuture(date) {
     console.log('fetching future', date);
-    fetchWeather(date)
+    const promise = fetchWeather(date)
       .then(d => {
-        console.log('fetched future', date, d)
-        this.setState({ futureWeather: d });
+        this.setState({
+          weather: d.daily.data[0],
+          futureWeather: d.hourly.data
+        });
       });
   }
 
   fetchPast(date) {
-    fetchWeather(date)
-      .then(d => this.setState({ pastWeather: d }));
+    const promise = fetchWeather(date)
+      .then(d => {
+        this.setState({ pastWeather: d.hourly.data });
+      });
   }
 
   render() {
     const today = startOfDay(new Date());
+    const summary = this.state.weather ? this.state.weather.summary : ' ';
     return (
       <View style={styles.container}>
+        <Text style={[styles.summary]}>{summary}</Text>
         <HourlyChart
           past={this.state.pastWeather}
           future={this.state.futureWeather}
-          style={{ marginBottom: 40 }}
+          style={{ marginBottom: 60 }}
         />
         <View style={styles.selectors}>
           <DateSelector
@@ -152,6 +159,14 @@ const styles = StyleSheet.create({
   vs: {
     color: '#88998899',
     fontSize: 20
+  },
+  summary: {
+    color: '#ff6666cc',
+    fontSize: 20,
+    fontStyle: 'italic',
+    width: 320,
+    textAlign: 'center',
+    marginBottom: 70
   },
   selectors: {
     alignItems  : 'center'
