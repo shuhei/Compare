@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Animated,
   Text,
-  View
+  View,
+  Image
 } from 'react-native';
 import startOfDay from 'date-fns/start_of_day';
 import addDays from 'date-fns/add_days';
@@ -15,6 +16,7 @@ import subDays from 'date-fns/sub_days';
 import { DateSelector } from './ios/components/DateSelector';
 import { HourlyChart } from './ios/components/HourlyChart';
 import { Forecast } from './types';
+import weatherIcons from './icons';
 
 const LAT = 35.699069;
 const LNG = 139.7728588;
@@ -36,7 +38,11 @@ function emptyWeather(): Array<Forecast> {
   for (let i = 0; i < 24; i++) {
     weather[i] = {
       time: i,
-      temperature: 0
+      temperature: 0,
+      windSpeed: 0,
+      windBearing: 0,
+      summary: null,
+      icon: null
     };
   }
   return weather;
@@ -100,7 +106,6 @@ class Compare extends Component {
   }
 
   fetchFuture(date) {
-    console.log('fetching future', date);
     const promise = fetchWeather(date)
       .then(d => {
         this.setState({
@@ -119,10 +124,8 @@ class Compare extends Component {
 
   render() {
     const today = startOfDay(new Date());
-    const summary = this.state.weather ? this.state.weather.summary : ' ';
     return (
       <View style={styles.container}>
-        <Text style={[styles.summary]}>{summary}</Text>
         <HourlyChart
           past={this.state.pastWeather}
           future={this.state.futureWeather}
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCCC',
+    backgroundColor: '#f5fccc',
   },
   vs: {
     color: '#88998899',

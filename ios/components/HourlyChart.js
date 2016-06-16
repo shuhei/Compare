@@ -5,10 +5,14 @@ import {
   Animated,
   ScrollView,
   Text,
-  View
+  View,
+  Image
 } from 'react-native';
 
+import weatherIcons from '../../icons';
 import { Forecast } from '../../types';
+
+const UNIT_SIZE = 14;
 
 type Props = {
   past: Array<Forecast>,
@@ -18,12 +22,17 @@ type Props = {
 
 type AnimatedForecast = {
   time: number,
-  temperature: Animated.Value
+  temperature: Animated.Value,
+  summary: ?string,
+  icon: ?string,
+  windSpeed: number,
+  windBearing: number
 };
 
 type AnimatedProps = {
   past: Array<AnimatedForecast>,
   future: Array<AnimatedForecast>,
+  ranges: Array<Object>,
   style: StyleSheet
 };
 
@@ -31,18 +40,24 @@ export class HourlyChart extends Component {
   props: Props;
   state: {
     past: Array<AnimatedForecast>,
-    future: Array<AnimatedForecast>
+    future: Array<AnimatedForecast>,
+    ranges: Array<Object>
   };
 
   constructor(props: Props) {
     super(props);
     this.state = {
       past: props.past.map(f => this.animateForecast(f)),
-      future: props.future.map(f => this.animateForecast(f))
+      future: props.future.map(f => this.animateForecast(f)),
+      ranges: []
     };
   }
 
   componentWillReceiveProps(nextProps: Props) {
+    this.setState({
+      ranges: this.makeRanges(nextProps)
+    });
+
     if (this.props.past !== nextProps.past) {
       this.springForecasts(this.state.past, nextProps.past).start();
     }
@@ -55,8 +70,27 @@ export class HourlyChart extends Component {
     return <AnimatedHourlyChart
       past={this.state.past}
       future={this.state.future}
+      ranges={this.state.ranges}
       style={this.props.style}
     />;
+  }
+
+  makeRanges(nextProps: Props) {
+    const future = nextProps.future;
+    const ranges = future.reduce((acc, item, i) => {
+      if (i === 0) {
+        acc.push({ icon: item.icon, start: i, end: i });
+      } else {
+        const last = acc[acc.length - 1];
+        if (i % 2 === 1 || last.icon === item.icon) {
+          last.end = i;
+        } else {
+          acc.push({ icon: item.icon, start: i, end: i });
+        }
+      }
+      return acc;
+    }, []);
+    return ranges;
   }
 
   springForecasts(from: Array<AnimatedForecast>, to: Array<Forecast>) {
@@ -70,7 +104,7 @@ export class HourlyChart extends Component {
 
   animateForecast(forecast: Forecast): AnimatedForecast {
     return {
-      time: forecast.time,
+      ...forecast,
       temperature: new Animated.Value(this.calcHeight(forecast.temperature))
     };
   }
@@ -81,7 +115,8 @@ export class HourlyChart extends Component {
   }
 }
 
-function AnimatedHourlyChart({ past, future, style }: AnimatedProps) {
+function AnimatedHourlyChart({ past, future, ranges, style }: AnimatedProps) {
+  console.log(ranges);
   const hours = past.slice(0, 24).map((p, i) => {
     const f = future[i];
     return <View key={i} style={[styles.barBox]}>
@@ -92,7 +127,35 @@ function AnimatedHourlyChart({ past, future, style }: AnimatedProps) {
   const texts = past.slice(0, 12).map((h, i) => (
     <Text key={i} style={[styles.barText]}>{i * 2}</Text>
   ));
+  const borderWidth = 2;
+  const icons = ranges.map((range, i) => {
+    const boxStyle = {
+      position: 'absolute',
+      left: range.start * UNIT_SIZE,
+      width: (range.end - range.start + 1) * UNIT_SIZE
+    };
+    const borderStyle = {
+      borderStyle: 'solid',
+      borderLeftColor: '#ff666622',
+      borderLeftWidth: 2,
+      borderRightColor: '#ff666622',
+      borderRightWidth: i === ranges.length - 1 ? 2 : 0,
+      height: 100
+    };
+    const iconStyle = {
+      position: 'absolute',
+      width: UNIT_SIZE * 2,
+      height: UNIT_SIZE * 2,
+      left: (range.end - range.start + 1 - 2) * UNIT_SIZE / 2,
+      top: 0
+    };
+    return <View key={i} style={[boxStyle]}>
+      <View style={[borderStyle]} />
+      <Image source={weatherIcons[range.icon]} style={[iconStyle]}/>
+    </View>;
+  });
   return <View style={[style, styles.container]}>
+    <View style={[{ height: 50 }]}>{icons}</View>
     <View style={styles.chartItems}>{hours}</View>
     <View style={styles.chartItems}>{texts}</View>
   </View>;
