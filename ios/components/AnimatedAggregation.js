@@ -1,0 +1,28 @@
+import { Animated } from 'react-native';
+
+const AnimatedWithChildren = Animated.Value.prototype.constructor;
+
+export class AnimatedAggregation<T> extends AnimatedWithChildren {
+  _parents: AnimatedWithChildren[];
+  _f: (parents: AnimatedWithChildren[]) => T;
+
+  constructor(parents: AnimatedWithChildren[], f: (parents: AnimatedWithChildren[]) => T) {
+    super();
+    this._parents = parents;
+    this._f = f;
+  }
+  __makeNative() {
+    this._parents.forEach(p => p.__makeNative());
+    super.__makeNative();
+  }
+  __attach(): void {
+    this._parents.forEach(h => h.__addChild(this));
+  }
+  __detach(): void {
+    this._parents.forEach(h => h.__removeChild(this));
+    super.__detach();
+  }
+  __getValue(): T {
+    return this._f.call(this, this._parents);
+  }
+}
