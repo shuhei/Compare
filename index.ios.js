@@ -7,7 +7,8 @@ import {
   Animated,
   Text,
   View,
-  Image
+  Image,
+  LayoutAnimation
 } from 'react-native';
 import startOfDay from 'date-fns/start_of_day';
 import addDays from 'date-fns/add_days';
@@ -108,6 +109,7 @@ class Compare extends Component {
   fetchFuture(date) {
     const promise = fetchWeather(date)
       .then(d => {
+        this.animate();
         this.setState({
           weather: d.daily.data[0],
           futureWeather: d.hourly.data
@@ -118,8 +120,13 @@ class Compare extends Component {
   fetchPast(date) {
     const promise = fetchWeather(date)
       .then(d => {
+        this.animate();
         this.setState({ pastWeather: d.hourly.data });
       });
+  }
+
+  animate() {
+    LayoutAnimation.spring();
   }
 
   render() {

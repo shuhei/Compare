@@ -15,119 +15,54 @@ import { Forecast } from '../../types';
 const UNIT_SIZE = 14;
 
 type Props = {
-  past: Array<Forecast>,
-  future: Array<Forecast>,
+  past: Forecast[],
+  future: Forecast[],
   style: StyleSheet
 };
 
-type AnimatedForecast = {
-  time: number,
-  temperature: Animated.Value,
-  summary: ?string,
-  icon: ?string,
-  windSpeed: number,
-  windBearing: number
+type WeatherRange = {
+  icon: string,
+  start: number,
+  end: number
 };
 
-type AnimatedProps = {
-  past: Array<AnimatedForecast>,
-  future: Array<AnimatedForecast>,
-  ranges: Array<Object>,
-  style: StyleSheet
-};
-
-export class HourlyChart extends Component {
-  props: Props;
-  state: {
-    past: Array<AnimatedForecast>,
-    future: Array<AnimatedForecast>,
-    ranges: Array<Object>
-  };
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      past: props.past.map(f => this.animateForecast(f)),
-      future: props.future.map(f => this.animateForecast(f)),
-      ranges: []
-    };
-  }
-
-  componentWillReceiveProps(nextProps: Props) {
-    this.setState({
-      ranges: this.makeRanges(nextProps)
-    });
-
-    if (this.props.past !== nextProps.past) {
-      this.springForecasts(this.state.past, nextProps.past).start();
-    }
-    if (this.props.future !== nextProps.future) {
-      this.springForecasts(this.state.future, nextProps.future).start();
-    }
-  }
-
-  render() {
-    return <AnimatedHourlyChart
-      past={this.state.past}
-      future={this.state.future}
-      ranges={this.state.ranges}
-      style={this.props.style}
-    />;
-  }
-
-  makeRanges(nextProps: Props) {
-    const future = nextProps.future;
-    const ranges = future.reduce((acc, item, i) => {
-      if (i === 0) {
-        acc.push({ icon: item.icon, start: i, end: i });
+function makeRanges(forecasts: Forecast[]): WeatherRange[] {
+  const ranges = forecasts.reduce((acc, item, i) => {
+    if (i === 0) {
+      acc.push({ icon: item.icon, start: i, end: i });
+    } else {
+      const last = acc[acc.length - 1];
+      if (i % 2 === 1 || last.icon === item.icon) {
+        last.end = i;
       } else {
-        const last = acc[acc.length - 1];
-        if (i % 2 === 1 || last.icon === item.icon) {
-          last.end = i;
-        } else {
-          acc.push({ icon: item.icon, start: i, end: i });
-        }
+        acc.push({ icon: item.icon, start: i, end: i });
       }
-      return acc;
-    }, []);
-    return ranges;
-  }
-
-  springForecasts(from: Array<AnimatedForecast>, to: Array<Forecast>) {
-    const springs = from.map((forecast, i) => Animated.spring(forecast.temperature, {
-      toValue: this.calcHeight(to[i].temperature),
-      friction: 3,
-      tension: 20
-    }));
-    return Animated.parallel(springs);
-  }
-
-  animateForecast(forecast: Forecast): AnimatedForecast {
-    return {
-      ...forecast,
-      temperature: new Animated.Value(this.calcHeight(forecast.temperature))
-    };
-  }
-
-  calcHeight(temperature: number) {
-    // TODO: Math.round??
-    return (temperature - 50) * 4;
-  }
+    }
+    return acc;
+  }, []);
+  return ranges;
 }
 
-function AnimatedHourlyChart({ past, future, ranges, style }: AnimatedProps) {
-  console.log(ranges);
-  const hours = past.slice(0, 24).map((p, i) => {
+function calcHeight(temperature: number): number {
+  // TODO: Math.round??
+  return (temperature - 50) * 4;
+}
+
+export function HourlyChart({ past, future, style }: Props) {
+  const bars = past.slice(0, 24).map((p, i) => {
     const f = future[i];
     return <View key={i} style={[styles.barBox]}>
-      <Animated.View style={[styles.bar, styles.barPast, { height: p.temperature }]} />
-      <Animated.View style={[styles.bar, styles.barFuture, { height: f.temperature }]} />
+      <Animated.View style={[styles.bar, styles.barPast, { height: calcHeight(p.temperature) }]} />
+      <Animated.View style={[styles.bar, styles.barFuture, { height: calcHeight(f.temperature) }]} />
     </View>;
   });
-  const texts = past.slice(0, 12).map((h, i) => (
+
+  const barTexts = past.slice(0, 12).map((h, i) => (
     <Text key={i} style={[styles.barText]}>{i * 2}</Text>
   ));
+
   const borderWidth = 2;
+  const ranges = makeRanges(future);
   const icons = ranges.map((range, i) => {
     const boxStyle = {
       position: 'absolute',
@@ -154,10 +89,11 @@ function AnimatedHourlyChart({ past, future, ranges, style }: AnimatedProps) {
       <Image source={weatherIcons[range.icon]} style={[iconStyle]}/>
     </View>;
   });
+
   return <View style={[style, styles.container]}>
     <View style={[{ height: 50 }]}>{icons}</View>
-    <View style={styles.chartItems}>{hours}</View>
-    <View style={styles.chartItems}>{texts}</View>
+    <View style={styles.chartItems}>{bars}</View>
+    <View style={styles.chartItems}>{barTexts}</View>
   </View>;
 }
 
