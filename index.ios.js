@@ -171,14 +171,6 @@ const styles = StyleSheet.create({
     color: '#88998899',
     fontSize: 20
   },
-  summary: {
-    color: '#ff6666cc',
-    fontSize: 20,
-    fontStyle: 'italic',
-    width: 320,
-    textAlign: 'center',
-    marginBottom: 70
-  },
   selectors: {
     alignItems  : 'center'
   }

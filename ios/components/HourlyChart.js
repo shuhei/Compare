@@ -20,8 +20,11 @@ import {
 import weatherIcons from '../../icons';
 import { Forecast } from '../../types';
 import { AnimatedAggregation } from './AnimatedAggregation';
+import Dimensions from 'Dimensions';
 
-const UNIT_SIZE = 14;
+const CHART_WIDTH = Dimensions.get('window').width;
+const UNIT_SIZE = CHART_WIDTH / 24;
+const CHART_HEIGHT = 250;
 
 const AnimatedGroup = Animated.createAnimatedComponent(Group);
 const AnimatedShape = Animated.createAnimatedComponent(Shape);
@@ -57,25 +60,16 @@ function makeRanges(forecasts: Forecast[]): WeatherRange[] {
 
 function calcHeight(temperature: number): number {
   // TODO: Math.round??
-  return (temperature - 50) * 4;
+  return (temperature - 50) * 6 - 50;
 }
 
-function WeatherIcons({ forecasts, style }) {
-  const borderWidth = 2;
-  const ranges = makeRanges(forecasts);
+function WeatherIcons({ ranges, style }) {
   const icons = ranges.map((range, i) => {
     const boxStyle = {
       position: 'absolute',
       left: range.start * UNIT_SIZE,
-      width: (range.end - range.start + 1) * UNIT_SIZE
-    };
-    const borderStyle = {
-      borderStyle: 'solid',
-      borderLeftColor: '#ff666622',
-      borderLeftWidth: 2,
-      borderRightColor: '#ff666622',
-      borderRightWidth: i === ranges.length - 1 ? 2 : 0,
-      height: 200
+      width: (range.end - range.start + 1) * UNIT_SIZE,
+      top: 0
     };
     const iconStyle = {
       position: 'absolute',
@@ -85,21 +79,39 @@ function WeatherIcons({ forecasts, style }) {
       top: 0
     };
     return <View key={i} style={[boxStyle]}>
-      <View style={[borderStyle]} />
       <Image source={weatherIcons[range.icon]} style={[iconStyle]}/>
     </View>;
   });
   return <View style={[{ height: 50 }, style]}>{icons}</View>;
 }
 
+function WeatherBorders({ ranges, style }) {
+  const icons = ranges.map((range, i) => {
+    const boxStyle = {
+      position: 'absolute',
+      left: range.start * UNIT_SIZE,
+      width: (range.end - range.start + 1) * UNIT_SIZE,
+      top: 0,
+      borderStyle: 'solid',
+      borderLeftColor: '#ff666633',
+      borderLeftWidth: i === 0 ? 0 : 1,
+      height: CHART_HEIGHT
+    };
+    return <View key={i} style={[boxStyle]} />;
+  });
+  return <View style={[{ height: 50 }, style]}>{icons}</View>;
+}
+
 function areaChartPath(w: number, h: number, heights: number[]) {
   const points = heights.map((height, i) => ({
-    x: i * UNIT_SIZE,
+    x: (0.5 + i) * UNIT_SIZE,
     y: h - height
   }));
   // http://stackoverflow.com/questions/7054272/how-to-draw-smooth-curve-through-n-points-using-javascript-html5-canvas
   let i = 0;
-  let path = Path().moveTo(0, h).lineTo(points[i].x, points[i].y);
+  let path = Path().moveTo(0, h)
+    .lineTo(0, points[i].y)
+    .lineTo(points[i].x, points[i].y);
   for (i = 1; i < 24 - 2; i++) {
     const p = points[i];
     const q = points[i + 1];
@@ -107,7 +119,9 @@ function areaChartPath(w: number, h: number, heights: number[]) {
     const yc = (p.y + q.y) / 2;
     path = path.curveTo(p.x, p.y, xc, yc);
   }
-  path = path.curveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+  path = path
+    .curveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y)
+    .lineTo(CHART_WIDTH, points[i + 1].y);
   return path.lineTo(w, h).close();
 }
 
@@ -121,7 +135,7 @@ function buildAnimatedPath(): AnimatedPath {
     .map(() => new Animated.Value(0));
   const animatedPath = new AnimatedAggregation(animatedHeights, (ts) => {
     const heights = animatedHeights.map(ah => ah.__getValue());
-    const p = areaChartPath(322, 200, heights);
+    const p = areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights);
     return p;
   });
   return {
@@ -168,8 +182,8 @@ export class HourlyChart extends Component {
   render() {
     const { past, future, style } = this.props;
 
-    const barTexts = past.slice(0, 12).map((h, i) => (
-      <Text key={i} style={[styles.barText]}>{i * 2}</Text>
+    const labels = past.slice(0, 12).map((h, i) => (
+      <Text key={i} style={[styles.hourLabel]}>{i * 2}</Text>
     ));
 
     const bars = past.slice(0, 24).map((p, i) => {
@@ -181,13 +195,11 @@ export class HourlyChart extends Component {
     });
     const barChart = <View style={styles.chartItems}>{bars}</View>;
 
-    const w = 322;
-    const h = 200;
     const heights = future.map(f => calcHeight(f.temperature));
-    const chartPath = areaChartPath(w, h, heights);
-    const areaChart = <View style={[{ width: w, height: h, position: 'absolute', top: -80 }]}>
-      <Surface width={w} height={h}>
-        <AnimatedShape fill="#9999cc66" d={this.state.past.path} />
+    const chartPath = areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights);
+    const areaChart = <View style={[{ width: CHART_WIDTH, height: CHART_HEIGHT, position: 'absolute', top: 0 }]}>
+      <Surface width={CHART_WIDTH} height={CHART_HEIGHT} style={[{ backgroundColor: '#00000000' }]}>
+        <AnimatedShape fill="#99999944" d={this.state.past.path} />
         <AnimatedShape fill="#ff666666" d={this.state.future.path} />
       </Surface>
     </View>;
@@ -195,17 +207,21 @@ export class HourlyChart extends Component {
     const chart = areaChart;
     // const chart = barChart;
 
+    const ranges = makeRanges(future);
+
     return <View style={[style, styles.container]}>
+      <WeatherBorders ranges={ranges} style={{ position: 'absolute', top: 0}} />
       {chart}
-      <WeatherIcons forecasts={future} style={{ position: 'absolute', top: -80 }}/>
-      <View style={styles.chartItems}>{barTexts}</View>
+      <WeatherIcons ranges={ranges} style={{ position: 'absolute', top: 0 }} />
+      <View style={styles.chartItems}>{labels}</View>
     </View>;
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    height: 150,
+    width: CHART_WIDTH,
+    height: CHART_HEIGHT + 25,
     justifyContent: 'flex-end'
   },
   chartItems: {
@@ -218,12 +234,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
   },
-  barText: {
+  hourLabel: {
     textAlign: 'center',
     marginTop: 4,
-    marginLeft: -5,
     marginRight: 9,
-    width: 24,
+    width: UNIT_SIZE * 2 - 9,
     fontWeight: 'bold',
     color: '#99999988',
   },
