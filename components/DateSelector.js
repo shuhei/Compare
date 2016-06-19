@@ -7,12 +7,13 @@ import {
   Text,
   View
 } from 'react-native';
+import Dimensions from 'Dimensions';
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/difference_in_days';
 
 import type DateChangeHandler from '../types';
 
-const WIDTH = 320;
+const WIDTH = Dimensions.get('window').width;
 
 type Props = {
   candidates: Array<Date>,
@@ -27,7 +28,7 @@ export function DateSelector({ candidates, onChange, today, textStyle }: Props) 
       <Text style={[styles.text, textStyle]}>{formatDate(date, today)}</Text>
     </View>
   ));
-  return <View style={[styles.container]}>
+  return <View>
     <ScrollView
       // https://github.com/facebook/react-native/issues/2251
       onMomentumScrollEnd={onScroll(onChange, candidates)}
@@ -66,13 +67,11 @@ function onScroll(onChange: DateChangeHandler, candidates: Array<Date>) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-  },
   item: {
-    width: WIDTH,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    width: WIDTH
   },
   text: {
     textAlign: 'center',

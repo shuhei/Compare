@@ -36,13 +36,15 @@ export function Main({
   onFutureChange
 }: Props) {
   return <View style={styles.container}>
-    {location ? <Text style={[styles.location]}>{location}</Text> : null}
+    <View style={styles.header}>
+      {location ? <Text style={[styles.location]}>{location}</Text> : null}
+    </View>
     <HourlyChart
       past={pastWeather}
       future={futureWeather}
       style={[styles.chart]}
     />
-    <View style={styles.selectors}>
+    <View style={styles.footer}>
       <DateSelector
         candidates={futureCandidates}
         onChange={onFutureChange}
@@ -65,20 +67,23 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: '#f5fccc',
+    alignItems: 'center'
+  },
+  header: {
+    flex: 1,
+    paddingTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   location: {
     color: '#ff6666cc',
-    fontSize: 20,
-    marginBottom: 67
+    fontSize: 20
   },
-  chart: {
-    marginBottom: 45
-  },
-  selectors: {
-    alignItems  : 'center',
-    marginBottom: 55
+  footer: {
+    flex: 1.2,
+    paddingBottom: 10,
+    justifyContent: 'center',
+    alignItems  : 'center'
   },
   vs: {
     color: '#88998899',
