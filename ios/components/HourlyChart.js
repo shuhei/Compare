@@ -23,8 +23,9 @@ import { AnimatedAggregation } from './AnimatedAggregation';
 import Dimensions from 'Dimensions';
 
 const CHART_WIDTH = Dimensions.get('window').width;
-const UNIT_SIZE = CHART_WIDTH / 24;
 const CHART_HEIGHT = 250;
+const UNIT_SIZE = CHART_WIDTH / 24;
+const ICON_SIZE = UNIT_SIZE * 1.6;
 
 const AnimatedGroup = Animated.createAnimatedComponent(Group);
 const AnimatedShape = Animated.createAnimatedComponent(Shape);
@@ -65,17 +66,18 @@ function calcHeight(temperature: number): number {
 
 function WeatherIcons({ ranges, style }) {
   const icons = ranges.map((range, i) => {
+    const rangeWidth = (range.end - range.start + 1) * UNIT_SIZE;
     const boxStyle = {
       position: 'absolute',
       left: range.start * UNIT_SIZE,
-      width: (range.end - range.start + 1) * UNIT_SIZE,
+      width: rangeWidth,
       top: 0
     };
     const iconStyle = {
       position: 'absolute',
-      width: UNIT_SIZE * 2,
-      height: UNIT_SIZE * 2,
-      left: (range.end - range.start + 1 - 2) * UNIT_SIZE / 2,
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      left: (rangeWidth - ICON_SIZE) / 2,
       top: 0
     };
     return <View key={i} style={[boxStyle]}>
