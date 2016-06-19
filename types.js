@@ -6,3 +6,5 @@ export type Forecast = {
   summary: ?string,
   icon: ?string
 };
+
+export type ChangeHandler = (date: Date) => void;

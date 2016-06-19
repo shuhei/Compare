@@ -10,43 +10,13 @@ import {
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/difference_in_days';
 
+import type DateChangeHandler from '../types';
+
 const WIDTH = 320;
-
-function formatDate(date: Date, today: Date): string {
-  switch (differenceInDays(date, today)) {
-    case 0:
-      return 'Today';
-    case 1:
-      return 'Tomorrow';
-    case -1:
-      return 'Yesterday';
-    default:
-      return format(date, 'ddd, MMM D, YYYY');
-  }
-}
-
-function times(n: number): Array<number> {
-  const arr = new Array(n);
-  for (let i = 0; i < n; i++) {
-    arr[i] = i;
-  }
-  return arr;
-}
-
-type ChangeHandler = (date: Date) => void;
-
-function onScroll(onChange: ChangeHandler, candidates: Array<Date>) {
-  return event => {
-    const offset = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(offset / 320);
-    // TODO: Call only when the index changes.
-    onChange(candidates[index]);
-  };
-}
 
 type Props = {
   candidates: Array<Date>,
-  onChange: ChangeHandler,
+  onChange: DateChangeHandler,
   today: Date,
   textStyle: Object
 };
@@ -71,6 +41,28 @@ export function DateSelector({ candidates, onChange, today, textStyle }: Props) 
       {items}
     </ScrollView>
   </View>;
+}
+
+function formatDate(date: Date, today: Date): string {
+  switch (differenceInDays(date, today)) {
+    case 0:
+      return 'Today';
+    case 1:
+      return 'Tomorrow';
+    case -1:
+      return 'Yesterday';
+    default:
+      return format(date, 'ddd, MMM D, YYYY');
+  }
+}
+
+function onScroll(onChange: DateChangeHandler, candidates: Array<Date>) {
+  return event => {
+    const offset = event.nativeEvent.contentOffset.x;
+    const index = Math.floor(offset / 320);
+    // TODO: Call only when the index changes.
+    onChange(candidates[index]);
+  };
 }
 
 const styles = StyleSheet.create({

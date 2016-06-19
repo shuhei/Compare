@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import startOfDay from 'date-fns/start_of_day';
 
-import type { Forecast } from '../types';
+import type { Forecast, DateChangeHandler } from '../types';
 import weatherIcons from '../icons';
 import { DateSelector } from './DateSelector';
 import { HourlyChart } from './HourlyChart';
@@ -20,8 +20,8 @@ type Props = {
   pastWeather: Forecast[],
   futureCandidates: Date[],
   futureWeather: Forecast[],
-  onFutureChange: (date: Date) => void,
-  onPastChange: (date: Date) => void
+  onFutureChange: DateChangeHandler,
+  onPastChange: DateChangeHandler
 };
 
 export function Main({

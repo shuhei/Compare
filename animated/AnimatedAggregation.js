@@ -11,7 +11,7 @@ export class AnimatedAggregation<T> extends AnimatedWithChildren {
     this._parents = parents;
     this._f = f;
   }
-  __makeNative() {
+  __makeNative(): void {
     this._parents.forEach(p => p.__makeNative());
     super.__makeNative();
   }
