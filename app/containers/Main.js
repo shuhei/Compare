@@ -2,58 +2,59 @@
 import React from 'react';
 import {
   StyleSheet,
-  Animated,
   Text,
   View,
   Image
 } from 'react-native';
+import { connect } from 'react-redux';
 import startOfDay from 'date-fns/start_of_day';
 
 import type { Forecast, DateChangeHandler } from '../types';
 import weatherIcons from '../icons';
-import { DateSelector } from './DateSelector';
-import { HourlyChart } from './HourlyChart';
+import { DateSelector } from '../components/DateSelector';
+import { HourlyChart } from '../components/HourlyChart';
+
+type DateInfo = {
+  candidates: Date[],
+  weather: Forecast[]
+};
 
 type Props = {
   location: string,
   today: Date,
-  pastCandidates: Date[],
-  pastWeather: Forecast[],
-  futureCandidates: Date[],
-  futureWeather: Forecast[],
+  past: DateInfo,
+  future: DateInfo,
   onFutureChange: DateChangeHandler,
   onPastChange: DateChangeHandler
 };
 
-export function Main({
+function Main({
   location,
   today,
-  pastWeather,
-  futureWeather,
-  pastCandidates,
-  futureCandidates,
+  past,
+  future,
   onPastChange,
   onFutureChange
 }: Props) {
   return <View style={styles.container}>
     <View style={styles.header}>
-      {location ? <Text style={[styles.location]}>{location}</Text> : null}
+      {location.name ? <Text style={[styles.location]}>{location.name}</Text> : null}
     </View>
     <HourlyChart
-      past={pastWeather}
-      future={futureWeather}
+      past={past.weather}
+      future={future.weather}
       style={[styles.chart]}
     />
     <View style={styles.footer}>
       <DateSelector
-        candidates={futureCandidates}
+        candidates={future.candidates}
         onChange={onFutureChange}
         today={today}
         textStyle={{ color: '#ff6666cc' }}
       />
       <Text style={[styles.vs]}>×</Text>
       <DateSelector
-        candidates={pastCandidates}
+        candidates={past.candidates}
         onChange={onPastChange}
         today={today}
         textStyle={{ color: '#889988dd' }}
@@ -61,6 +62,18 @@ export function Main({
     </View>
   </View>;
 }
+
+const stateToProps = state => state;
+const dispatchToProps = dispatch => ({
+  onPastChange(date: Date): void {
+    dispatch({ type: 'PAST_DATE_CHANGED', payload: date });
+  },
+  onFutureChange(date: Date): void {
+    dispatch({ type: 'FUTURE_DATE_CHANGED', payload: date });
+  }
+});
+Main = connect(stateToProps, dispatchToProps)(Main);
+export default Main;
 
 const styles = StyleSheet.create({
   container: {

@@ -16,7 +16,7 @@ import type { DateChangeHandler } from '../types';
 const WIDTH = Dimensions.get('window').width;
 
 type Props = {
-  candidates: Array<Date>,
+  candidates: Date[],
   onChange: DateChangeHandler,
   today: Date,
   textStyle: Object

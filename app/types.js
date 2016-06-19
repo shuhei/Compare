@@ -7,4 +7,14 @@ export type Forecast = {
   icon: ?string
 };
 
+export type Coords = {
+  lat: number,
+  lng: number
+};
+
+export type Action = {
+  type: string,
+  payload: any
+};
+
 export type ChangeHandler = (date: Date) => void;
