@@ -1,2 +1,2 @@
 /* @flow */
-import './index.js';
+import './app/index.js';

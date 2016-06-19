@@ -1,7 +1,6 @@
 /* @flow */
 import React, { Component } from 'react';
 import {
-  AppRegistry,
   LayoutAnimation
 } from 'react-native';
 import startOfDay from 'date-fns/start_of_day';
@@ -9,8 +8,8 @@ import addDays from 'date-fns/add_days';
 import subDays from 'date-fns/sub_days';
 import Geocoder from 'react-native-geocoder';
 
-import type { Forecast } from './types';
-import { Main } from './components/Main';
+import type { Forecast } from '../types';
+import { Main } from '../components/Main';
 
 const LAT = 35.699069;
 const LNG = 139.7728588;
@@ -48,7 +47,7 @@ function emptyWeather(): Forecast[] {
   return weather;
 }
 
-class Compare extends Component {
+export class Compare extends Component {
   state: {
     location: string,
     lat: ?number,
@@ -92,7 +91,7 @@ class Compare extends Component {
     });
   }
 
-  setPosition(lat, lng) {
+  setPosition(lat: number, lng: number) {
     const pos = { lat, lng };
     this.setState(pos);
     this.fetchFuture(this.state.future);
@@ -131,7 +130,7 @@ class Compare extends Component {
     this.fetchFuture(date);
   }
 
-  fetchFuture(date) {
+  fetchFuture(date: Date) {
     if (this.state.lat == null || this.state.lng == null) {
       return;
     }
@@ -142,7 +141,7 @@ class Compare extends Component {
       });
   }
 
-  fetchPast(date) {
+  fetchPast(date: Date) {
     if (this.state.lat == null || this.state.lng == null) {
       return;
     }
@@ -171,5 +170,3 @@ class Compare extends Component {
     return <Main {...props} />;
   }
 }
-
-AppRegistry.registerComponent('Compare', () => Compare);

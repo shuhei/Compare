@@ -11,7 +11,7 @@ import Dimensions from 'Dimensions';
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/difference_in_days';
 
-import type DateChangeHandler from '../types';
+import type { DateChangeHandler } from '../types';
 
 const WIDTH = Dimensions.get('window').width;
 
