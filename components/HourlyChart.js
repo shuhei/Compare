@@ -17,9 +17,9 @@ import {
   Transform
 } from 'ReactNativeART';
 
-import weatherIcons from '../../icons';
-import { Forecast } from '../../types';
-import { AnimatedAggregation } from './AnimatedAggregation';
+import weatherIcons from '../icons';
+import { Forecast } from '../types';
+import { AnimatedAggregation } from '../animated/AnimatedAggregation';
 import Dimensions from 'Dimensions';
 
 const CHART_WIDTH = Dimensions.get('window').width;
