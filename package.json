@@ -9,6 +9,7 @@
     "art": "^0.10.1",
     "date-fns": "^1.3.0",
     "react": "^15.1.0",
-    "react-native": "^0.27.2"
+    "react-native": "^0.27.2",
+    "react-native-geocoder": "^0.4.2"
   }
 }

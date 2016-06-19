@@ -15,6 +15,7 @@ import { DateSelector } from './DateSelector';
 import { HourlyChart } from './HourlyChart';
 
 type Props = {
+  location: string,
   today: Date,
   pastCandidates: Date[],
   pastWeather: Forecast[],
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function Main({
+  location,
   today,
   pastWeather,
   futureWeather,
@@ -34,10 +36,11 @@ export function Main({
   onFutureChange
 }: Props) {
   return <View style={styles.container}>
+    {location ? <Text style={[styles.location]}>{location}</Text> : null}
     <HourlyChart
       past={pastWeather}
       future={futureWeather}
-      style={{ marginBottom: 60 }}
+      style={[styles.chart]}
     />
     <View style={styles.selectors}>
       <DateSelector
@@ -61,16 +64,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
-    // justifyContent: 'flex-end',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: '#f5fccc',
+  },
+  location: {
+    color: '#ff6666cc',
+    fontSize: 20,
+    marginBottom: 67
+  },
+  chart: {
+    marginBottom: 45
+  },
+  selectors: {
+    alignItems  : 'center',
+    marginBottom: 55
   },
   vs: {
     color: '#88998899',
     fontSize: 20
-  },
-  selectors: {
-    alignItems  : 'center'
   }
 });

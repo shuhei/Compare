@@ -7,6 +7,7 @@ import {
 import startOfDay from 'date-fns/start_of_day';
 import addDays from 'date-fns/add_days';
 import subDays from 'date-fns/sub_days';
+import Geocoder from 'react-native-geocoder';
 
 import type { Forecast } from './types';
 import { Main } from './components/Main';
@@ -15,13 +16,19 @@ const LAT = 35.699069;
 const LNG = 139.7728588;
 const API_KEY = '7e67edfa2365bcdbd128ab5d4865ad95';
 
-function weatherUrl(lat: number, lng: number, date: Date): string {
+type WeatherResponse = {
+  hourly: {
+    data: Forecast[]
+  }
+};
+
+function weatherUrl(date: Date, lat: number, lng: number): string {
   const timestamp = Math.floor(date.getTime() / 1000);
   return `https://api.forecast.io/forecast/${API_KEY}/${lat},${lng},${timestamp}`;
 }
 
-function fetchWeather(date): Promise<{ daily: any, hourly: { data: Forecast[] } }> {
-  const url = weatherUrl(LAT, LNG, date);
+function fetchWeather(date: Date, lat: number, lng: number): Promise<WeatherResponse> {
+  const url = weatherUrl(date, lat, lng);
   return fetch(url)
     .then(res => res.json());
 }
@@ -43,6 +50,9 @@ function emptyWeather(): Forecast[] {
 
 class Compare extends Component {
   state: {
+    location: string,
+    lat: ?number,
+    lng: ?number,
     today: Date,
     past: Date,
     pastCandidates: Date[],
@@ -60,6 +70,9 @@ class Compare extends Component {
     const futureDates = Array(7).fill().map((_, i) => addDays(today, i));
 
     this.state = {
+      location: 'Getting location...',
+      lat: null,
+      lng: null,
       today: today,
       past: yesterday,
       pastCandidates: [yesterday, today],
@@ -71,8 +84,31 @@ class Compare extends Component {
   }
 
   componentDidMount() {
+    navigator.geolocation.getCurrentPosition(position => {
+      this.setPosition(position.coords.latitude, position.coords.longitude);
+    }, error => {
+      // TODO: Fix error on iOS simulator.
+      this.setPosition(LAT, LNG);
+    });
+  }
+
+  setPosition(lat, lng) {
+    const pos = { lat, lng };
+    this.setState(pos);
     this.fetchFuture(this.state.future);
     this.fetchPast(this.state.past);
+
+    Geocoder.geocodePosition(pos)
+      .then(res => {
+        console.log(res);
+        const geocode = res[0];
+        const location = `${geocode.locality}, ${geocode.adminArea}`;
+        this.setState({ location: location });
+      })
+      .catch(e => {
+        console.log(e);
+        this.setState({ location: 'Failed to geocode' });
+      });
   }
 
   onPastChange(date: Date): void {
@@ -96,7 +132,10 @@ class Compare extends Component {
   }
 
   fetchFuture(date) {
-    const promise = fetchWeather(date)
+    if (this.state.lat == null || this.state.lng == null) {
+      return;
+    }
+    const promise = fetchWeather(date, this.state.lat, this.state.lng)
       .then(d => {
         this.animate();
         this.setState({ futureWeather: d.hourly.data });
@@ -104,7 +143,10 @@ class Compare extends Component {
   }
 
   fetchPast(date) {
-    const promise = fetchWeather(date)
+    if (this.state.lat == null || this.state.lng == null) {
+      return;
+    }
+    const promise = fetchWeather(date, this.state.lat, this.state.lng)
       .then(d => {
         this.animate();
         this.setState({ pastWeather: d.hourly.data });
@@ -117,6 +159,7 @@ class Compare extends Component {
 
   render() {
     const props = {
+      location: this.state.location,
       today: this.state.today,
       pastWeather: this.state.pastWeather,
       futureWeather: this.state.futureWeather,
