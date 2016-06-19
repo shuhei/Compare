@@ -60,7 +60,6 @@ function makeRanges(forecasts: Forecast[]): WeatherRange[] {
 }
 
 function calcHeight(temperature: number): number {
-  // TODO: Math.round??
   return (temperature - 50) * 6 - 50;
 }
 
@@ -71,17 +70,12 @@ function WeatherIcons({ ranges, style }) {
       position: 'absolute',
       left: range.start * UNIT_SIZE,
       width: rangeWidth,
-      top: 0
+      justifyContent: 'flex-start',
+      alignItems: 'center'
     };
-    const iconStyle = {
-      position: 'absolute',
-      width: ICON_SIZE,
-      height: ICON_SIZE,
-      left: (rangeWidth - ICON_SIZE) / 2,
-      top: 0
-    };
+    // Image is cached with its key and does not change even if source has changed.
     return <View key={i} style={[boxStyle]}>
-      <Image source={weatherIcons[range.icon]} style={[iconStyle]}/>
+      <Image key={range.icon} source={weatherIcons[range.icon]} style={[styles.icon]} />
     </View>;
   });
   return <View style={[{ height: 50 }, style]}>{icons}</View>;
@@ -104,6 +98,10 @@ function WeatherBorders({ ranges, style }) {
   return <View style={[{ height: 50 }, style]}>{icons}</View>;
 }
 
+// heights are for 00:00-23:00.
+// To keep enough space to show icons at the screen edge, draw:
+// - the previous days' 23:30-24:00 with the value of 00:00.
+// - 23:00-23:30 with the value of 23:00.
 function areaChartPath(w: number, h: number, heights: number[]) {
   const points = heights.map((height, i) => ({
     x: (0.5 + i) * UNIT_SIZE,
@@ -188,15 +186,6 @@ export class HourlyChart extends Component {
       <Text key={i} style={[styles.hourLabel]}>{i * 2}</Text>
     ));
 
-    const bars = past.slice(0, 24).map((p, i) => {
-      const f = future[i];
-      return <View key={i} style={[styles.barBox]}>
-        <View style={[styles.bar, styles.barPast, { height: calcHeight(p.temperature) }]} />
-        <View style={[styles.bar, styles.barFuture, { height: calcHeight(f.temperature) }]} />
-      </View>;
-    });
-    const barChart = <View style={styles.chartItems}>{bars}</View>;
-
     const heights = future.map(f => calcHeight(f.temperature));
     const chartPath = areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights);
     const areaChart = <View style={[{ width: CHART_WIDTH, height: CHART_HEIGHT, position: 'absolute', top: 0 }]}>
@@ -207,7 +196,6 @@ export class HourlyChart extends Component {
     </View>;
 
     const chart = areaChart;
-    // const chart = barChart;
 
     const ranges = makeRanges(future);
 
@@ -230,12 +218,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
   },
-  barBox: {
-    width: 10,
-    marginHorizontal: 2,
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-  },
   hourLabel: {
     textAlign: 'center',
     marginTop: 4,
@@ -244,16 +226,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#99999988',
   },
-  bar: {
-    width: 10,
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
-  },
-  barPast: {
-    backgroundColor: '#bbccbbff',
-  },
-  barFuture: {
-    backgroundColor: '#ff666688',
-    marginLeft: -10,
+  icon: {
+    width: ICON_SIZE,
+    height: ICON_SIZE
   }
 });
