@@ -4,9 +4,9 @@ const AnimatedWithChildren = Animated.Value.prototype.constructor;
 
 export class AnimatedAggregation<T> extends AnimatedWithChildren {
   _parents: AnimatedWithChildren[];
-  _f: (parents: AnimatedWithChildren[]) => T;
+  _f: (parents: number[]) => T;
 
-  constructor(parents: AnimatedWithChildren[], f: (parents: AnimatedWithChildren[]) => T) {
+  constructor(parents: AnimatedWithChildren[], f: (parents: number[]) => T) {
     super();
     this._parents = parents;
     this._f = f;
@@ -23,6 +23,7 @@ export class AnimatedAggregation<T> extends AnimatedWithChildren {
     super.__detach();
   }
   __getValue(): T {
-    return this._f.call(this, this._parents);
+    const values = this._parents.map(p => p.__getValue());
+    return this._f.call(this, values);
   }
 }

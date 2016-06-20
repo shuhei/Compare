@@ -133,11 +133,10 @@ type AnimatedPath = {
 function buildAnimatedPath(): AnimatedPath {
   const animatedHeights = Array.from(Array(24))
     .map(() => new Animated.Value(0));
-  const animatedPath = new AnimatedAggregation(animatedHeights, (ts) => {
-    const heights = animatedHeights.map(ah => ah.__getValue());
-    const p = areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights);
-    return p;
-  });
+  const animatedPath = new AnimatedAggregation(
+    animatedHeights,
+    heights => areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights)
+  );
   return {
     heights: animatedHeights,
     path: animatedPath
