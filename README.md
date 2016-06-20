@@ -6,6 +6,16 @@ A super-simple app to compare temperatures of yesterday and today.
 
 ## Development
 
+Create `secret.json` with an API key of [The Dark Sky Forecast API](https://developer.forecast.io://developer.forecast.io/):
+
+```json
+{
+  "API_KEY": "Your API key"
+}
+```
+
+And then:
+
 ```js
 npm install -g react-native
 npm install

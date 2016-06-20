@@ -10,10 +10,10 @@ import Geocoder from 'react-native-geocoder';
 
 import type { Forecast } from '../types';
 import { Main } from '../components/Main';
+import { API_KEY } from '../../secret.json';
 
 const LAT = 35.699069;
 const LNG = 139.7728588;
-const API_KEY = '7e67edfa2365bcdbd128ab5d4865ad95';
 
 type WeatherResponse = {
   hourly: {
