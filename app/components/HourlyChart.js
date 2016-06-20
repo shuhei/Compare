@@ -19,7 +19,7 @@ import {
 
 import weatherIcons from '../icons';
 import { Forecast } from '../types';
-import { AnimatedAggregation } from '../animated/AnimatedAggregation';
+import { aggregate, AnimatedAggregation } from '../animated/AnimatedAggregation';
 import Dimensions from 'Dimensions';
 
 const CHART_WIDTH = Dimensions.get('window').width;
@@ -133,7 +133,7 @@ type AnimatedPath = {
 function buildAnimatedPath(): AnimatedPath {
   const animatedHeights = Array.from(Array(24))
     .map(() => new Animated.Value(0));
-  const animatedPath = new AnimatedAggregation(
+  const animatedPath = aggregate(
     animatedHeights,
     heights => areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights)
   );

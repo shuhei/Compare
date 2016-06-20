@@ -1,3 +1,4 @@
+/* @flow */
 import { Animated } from 'react-native';
 
 const AnimatedWithChildren = Animated.Value.prototype.constructor;
@@ -26,4 +27,11 @@ export class AnimatedAggregation<T> extends AnimatedWithChildren {
     const values = this._parents.map(p => p.__getValue());
     return this._f.call(this, values);
   }
+}
+
+export function aggregate<T>(
+  parents: AnimatedWithChildren[],
+  f: (parents: number[]) => T
+): AnimatedAggregation<T> {
+  return new AnimatedAggregation(parents, f);
 }
