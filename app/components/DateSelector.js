@@ -60,7 +60,7 @@ function formatDate(date: Date, today: Date): string {
 function onScroll(onChange: DateChangeHandler, candidates: Array<Date>) {
   return event => {
     const offset = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(offset / 320);
+    const index = Math.floor(offset / WIDTH);
     // TODO: Call only when the index changes.
     onChange(candidates[index]);
   };
