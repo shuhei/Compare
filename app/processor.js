@@ -56,7 +56,7 @@ function createWeatherStream(prefix: string, dayKey: string, action$, store): Ob
       const date = state[dayKey].date;
       const { coords } = state.location;
       if (coords) {
-        return Observable.fromPromise(fetchWeather(date, coords));
+        return getWeather(date, coords);
       } else {
         return Observable.empty();
       }
@@ -64,15 +64,19 @@ function createWeatherStream(prefix: string, dayKey: string, action$, store): Ob
     .map(weather => ({ type: `${prefix}WEATHER_RECEIVED`, payload: weather.hourly.data }));
 }
 
+function getJson(url: string): Observable<any> {
+  const promise = fetch(url).then(res => res.json());
+  return Observable.fromPromise(promise);
+}
+
 function weatherUrl(date: Date, { lat, lng }: Coords): string {
   const timestamp = Math.floor(date.getTime() / 1000);
   return `https://api.forecast.io/forecast/${API_KEY}/${lat},${lng},${timestamp}`;
 }
 
-function fetchWeather(date: Date, coords: Coords): Promise<WeatherResponse> {
+function getWeather(date: Date, coords: Coords): Observable<WeatherResponse> {
   const url = weatherUrl(date, coords);
-  return fetch(url)
-    .then(res => res.json());
+  return getJson(url);
 }
 
 function getLocation(): Promise<Coords> {
