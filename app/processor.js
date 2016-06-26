@@ -1,14 +1,18 @@
 /* @flow */
 import { LayoutAnimation } from 'react-native';
 import Geocoder from 'react-native-geocoder';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/observable/merge';
-import 'rxjs/add/observable/combineLatest';
-import 'rxjs/add/observable/empty';
+import type { Action, Store } from 'redux';
+import { ActionsObservable } from 'redux-observable';
+// FIXME: Importing from 'rxjs' to make flow check types. This bundles everything from rxjs.
+import { Observable } from 'rxjs';
+// import { Observable } from 'rxjs/Observable';
+// import 'rxjs/add/operator/map';
+// import 'rxjs/add/operator/mergeMap';
+// import 'rxjs/add/operator/do';
+// import 'rxjs/add/observable/fromPromise';
+// import 'rxjs/add/observable/merge';
+// import 'rxjs/add/observable/combineLatest';
+// import 'rxjs/add/observable/empty';
 
 import { API_KEY } from '../secret.json';
 import type {
@@ -22,8 +26,7 @@ type WeatherResponse = {
   }
 };
 
-// TODO: Type annotation
-export default function processor(action$: Observable<any>, store: any): Observable<any> {
+export default function processor(action$: ActionsObservable<Action>, store: Store): Observable<Action> {
   const locationCoords$ = action$.ofType('APP_INIT')
     .mergeMap(() => Observable.fromPromise(getLocation()))
     .map(coords => ({ type: 'LOCATION_COORDS_CHANGED', payload: coords }));
@@ -43,7 +46,7 @@ export default function processor(action$: Observable<any>, store: any): Observa
   ).do(() => LayoutAnimation.spring());
 }
 
-function createWeatherStream(prefix: string, dayKey: string, action$, store): Observable<any> {
+function createWeatherStream(prefix: string, dayKey: string, action$, store): Observable<Action> {
   return Observable.merge(
     action$.ofType('LOCATION_COORDS_CHANGED'),
     action$.ofType(`${prefix}DATE_CHANGED`)

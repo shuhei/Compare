@@ -8,7 +8,7 @@ import { reduxObservable } from 'redux-observable';
 import createLogger from 'redux-logger';
 
 import reducers from './reducers';
-import processor from './observables';
+import processor from './processor';
 import Main from './containers/Main';
 
 const createStoreWithMiddleware = applyMiddleware(

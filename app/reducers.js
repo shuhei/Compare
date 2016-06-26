@@ -26,7 +26,7 @@ const yesterday = subDays(today, 1);
 const futureDates = Array(7).fill().map((_, i) => addDays(today, i));
 const pastDates = [yesterday, today];
 
-function initialDay(date, candidates) {
+function initialDay(date: Date, candidates: Date[]): Day {
   return {
     date,
     candidates,
@@ -68,7 +68,7 @@ function prefixedDay(prefix: string, initial: Day) {
   };
 }
 
-function day(state: Day, action: Action) {
+function day(state: Day, action: Action): Day {
   switch (action.type) {
     case 'DATE_CHANGED':
       return { ...state, date: action.payload };
@@ -81,7 +81,7 @@ function day(state: Day, action: Action) {
   }
 }
 
-function location(state: Location = initialLocation, action: Action) {
+function location(state: Location = initialLocation, action: Action): Location {
   switch (action.type) {
     case 'LOCATION_COORDS_CHANGED':
       return { ...state, coords: action.payload };
@@ -92,7 +92,7 @@ function location(state: Location = initialLocation, action: Action) {
   }
 }
 
-function todayFunc(state: Date = today, action: Action) {
+function todayFunc(state: Date = today, action: Action): Date {
   return state;
 }
 
