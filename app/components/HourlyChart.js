@@ -125,12 +125,12 @@ function areaChartPath(w: number, h: number, heights: number[]) {
   return path.lineTo(w, h).close();
 }
 
-type AnimatedPath = {
+type AnimatedPath<T> = {
   heights: Animated.Value[],
-  path: AnimatedAggregation
+  path: AnimatedAggregation<T>
 };
 
-function buildAnimatedPath(): AnimatedPath {
+function buildAnimatedPath(): AnimatedPath<*> {
   const animatedHeights = Array.from(Array(24))
     .map(() => new Animated.Value(0));
   const animatedPath = aggregate(
@@ -143,7 +143,7 @@ function buildAnimatedPath(): AnimatedPath {
   };
 }
 
-function springPath(animatedPath: AnimatedPath, forecasts: Forecast[]): void {
+function springPath(animatedPath: AnimatedPath<*>, forecasts: Forecast[]): void {
   const heights = forecasts.map(f => calcHeight(f.temperature));
   const anims = animatedPath.heights.map((ah, i) => {
     return Animated.spring(ah, {
@@ -157,8 +157,8 @@ function springPath(animatedPath: AnimatedPath, forecasts: Forecast[]): void {
 
 export class HourlyChart extends Component {
   state: {
-    future: AnimatedPath,
-    past: AnimatedPath
+    future: AnimatedPath<*>,
+    past: AnimatedPath<*>,
   };
 
   constructor(props: Props) {

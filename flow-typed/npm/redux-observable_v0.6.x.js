@@ -1,21 +1,21 @@
-import type { Middleware, Store, Action } from 'redux';
+import type { Middleware, MiddlewareAPI, Action } from 'redux';
 import { Observable, Operator } from 'rxjs';
 // import { Observable } from 'rxjs/Observable';
 // import { Operator } from 'rxjs/Operator';
 
 declare module 'redux-observable' {
-  declare type Processor =
-    (action$: ActionsObservable, store: Store) => Observable<Action>;
+  declare type Epic<S, A> =
+    (action$: ActionsObservable<A>, store: MiddlewareAPI<S, A>) => Observable<A>;
 
-  declare function reduxObservable(processor?: Processor): Middleware;
+  declare function createEpicMiddleware<S, A>(epic?: Epic<S, A>): Middleware<S, A>;
 
   // FIXME: ActionsObservable's methods are not checked properly...
   // FIXME: <T: Action> doesn't work somehow.
-  declare class ActionsObservable<T: Object> extends Observable<T> {
-    constructor(actionsSubject: Observable<T>): void;
+  declare class ActionsObservable<A> extends Observable<A> {
+    constructor(actionsSubject: Observable<A>): void;
 
-    lift(operator: Operator<Action, T>): ActionsObservable<Action>;
+    lift(operator: Operator<any, A>): ActionsObservable<A>;
 
-    ofType(...key: any[]): ActionsObservable<T>;
+    ofType(...key: any[]): ActionsObservable<A>;
   }
 }
