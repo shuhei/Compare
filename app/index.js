@@ -4,19 +4,20 @@ import { AppRegistry } from 'react-native';
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { Provider, connect } from 'react-redux';
-import { reduxObservable } from 'redux-observable';
+import { createEpicMiddleware } from 'redux-observable';
 import createLogger from 'redux-logger';
 
 import reducers from './reducers';
-import processor from './processor';
+import epic from './epic';
 import Main from './containers/Main';
 
-const createStoreWithMiddleware = applyMiddleware(
-  reduxObservable(processor),
-  createLogger()
-)(createStore);
-const reducer = combineReducers(reducers);
-const store = createStoreWithMiddleware(reducer);
+const store = createStore(
+  combineReducers(reducers),
+  applyMiddleware(
+    createEpicMiddleware(epic),
+    createLogger()
+  )
+);
 store.dispatch({ type: 'APP_INIT' });
 
 function Compare() {

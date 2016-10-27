@@ -26,7 +26,7 @@ type WeatherResponse = {
   }
 };
 
-export default function processor(action$: ActionsObservable<Action>, store: Store): Observable<Action> {
+export default function (action$: ActionsObservable<Action>, store: Store): Observable<Action> {
   const locationCoords$ = action$.ofType('APP_INIT')
     .mergeMap(() => Observable.fromPromise(getLocation()))
     .map(coords => ({ type: 'LOCATION_COORDS_CHANGED', payload: coords }));
