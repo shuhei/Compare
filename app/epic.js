@@ -1,7 +1,7 @@
 /* @flow */
 import { LayoutAnimation } from 'react-native';
 import Geocoder from 'react-native-geocoder';
-import type { Action, Store } from 'redux';
+import type { MiddlewareAPI } from 'redux';
 import { ActionsObservable } from 'redux-observable';
 // FIXME: Importing from 'rxjs' to make flow check types. This bundles everything from rxjs.
 import { Observable } from 'rxjs';
@@ -16,9 +16,11 @@ import { Observable } from 'rxjs';
 
 import { API_KEY } from '../secret.json';
 import type {
+  Action,
   Forecast,
   Coords
 } from './types';
+import type { State } from './reducers';
 
 type WeatherResponse = {
   hourly: {
@@ -26,7 +28,7 @@ type WeatherResponse = {
   }
 };
 
-export default function (action$: ActionsObservable<Action>, store: Store): Observable<Action> {
+export default function (action$: ActionsObservable<Action>, store: MiddlewareAPI<State, Action>): Observable<Action> {
   const locationCoords$ = action$.ofType('APP_INIT')
     .mergeMap(() => Observable.fromPromise(getLocation()))
     .map(coords => ({ type: 'LOCATION_COORDS_CHANGED', payload: coords }));
