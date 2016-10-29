@@ -28,14 +28,13 @@ export function DateSelector({ candidates, onChange, today, textStyle }: Props) 
       <Text style={[styles.text, textStyle]}>{formatDate(date, today)}</Text>
     </View>
   ));
-  return <View>
+  return <View style={[styles.container]}>
     <ScrollView
       // https://github.com/facebook/react-native/issues/2251
       onMomentumScrollEnd={onScroll(onChange, candidates)}
       horizontal={true}
       pagingEnabled={true}
       showsHorizontalScrollIndicator={false}
-      style={[styles.scroll]}
       scrollEventThrottle={100}
       alwaysBoundHorizontal={false}
     >
@@ -67,6 +66,9 @@ function onScroll(onChange: DateChangeHandler, candidates: Array<Date>) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: WIDTH
+  },
   item: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -77,8 +79,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 12,
     fontSize: 22
-  },
-  scroll: {
-    width: WIDTH
   }
 });
