@@ -36,6 +36,9 @@ function Main({
   onPastChange,
   onFutureChange
 }: Props) {
+  const temperatures = past.weather.concat(future.weather).map(f => f.temperature);
+  const minTemperature = temperatures.length > 0 ? Math.min(...temperatures) : null;
+  const maxTemperature = temperatures.length > 0 ? Math.max(0, ...temperatures) : null;
   return <View style={styles.container}>
     <View style={styles.header}>
       {location.name ? <Text style={[styles.location]}>{location.name}</Text> : null}
@@ -43,6 +46,8 @@ function Main({
     <HourlyChart
       past={past.weather}
       future={future.weather}
+      minTemperature={minTemperature}
+      maxTemperature={maxTemperature}
       style={[styles.chart]}
     />
     <View style={styles.footer}>
@@ -86,7 +91,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 10,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   location: {
     color: '#ff6666cc',

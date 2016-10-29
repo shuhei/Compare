@@ -33,6 +33,8 @@ const AnimatedShape = Animated.createAnimatedComponent(Shape);
 type Props = {
   past: Forecast[],
   future: Forecast[],
+  minTemperature: number,
+  maxTemperature: number,
   style: StyleSheet
 };
 
@@ -59,8 +61,9 @@ function makeRanges(forecasts: Forecast[]): WeatherRange[] {
   return ranges;
 }
 
-function calcHeight(temperature: number): number {
-  return (temperature - 50) * 6 - 50;
+function calcHeight(minTemperature: number, maxTemperature: number, temperature: number): number {
+  const ratio = (temperature - minTemperature) / (maxTemperature - minTemperature);
+  return CHART_HEIGHT * (ratio * 0.6 + 0.1);
 }
 
 function WeatherIcons({ ranges, style }) {
@@ -143,8 +146,8 @@ function buildAnimatedPath(): AnimatedPath<*> {
   };
 }
 
-function springPath(animatedPath: AnimatedPath<*>, forecasts: Forecast[]): void {
-  const heights = forecasts.map(f => calcHeight(f.temperature));
+function springPath(animatedPath: AnimatedPath<*>, minTemperature: number, maxTemperature: number, forecasts: Forecast[]): void {
+  const heights = forecasts.map(f => calcHeight(minTemperature, maxTemperature, f.temperature));
   const anims = animatedPath.heights.map((ah, i) => {
     return Animated.spring(ah, {
       toValue: heights[i],
@@ -170,11 +173,11 @@ export class HourlyChart extends Component {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (this.props.future !== nextProps.future) {
-      springPath(this.state.future, nextProps.future);
-    }
-    if (this.props.past !== nextProps.past) {
-      springPath(this.state.past, nextProps.past);
+    // TODO: We need more stable min/max tempertures.
+    // Otherwise min/max temperature's change makes unchnaged date's chart move.
+    if (this.props.future !== nextProps.future || this.props.past !== nextProps.past) {
+      springPath(this.state.future, nextProps.minTemperature, nextProps.maxTemperature, nextProps.future);
+      springPath(this.state.past, nextProps.minTemperature, nextProps.maxTemperature, nextProps.past);
     }
   }
 
@@ -185,8 +188,6 @@ export class HourlyChart extends Component {
       <Text key={i} style={[styles.hourLabel]}>{i * 2}</Text>
     ));
 
-    const heights = future.map(f => calcHeight(f.temperature));
-    const chartPath = areaChartPath(CHART_WIDTH, CHART_HEIGHT, heights);
     const areaChart = <View style={[{ width: CHART_WIDTH, height: CHART_HEIGHT, position: 'absolute', top: 0 }]}>
       <Surface width={CHART_WIDTH} height={CHART_HEIGHT} style={[{ backgroundColor: '#00000000' }]}>
         <AnimatedShape fill="#99999944" d={this.state.past.path} />
@@ -194,13 +195,11 @@ export class HourlyChart extends Component {
       </Surface>
     </View>;
 
-    const chart = areaChart;
-
     const ranges = makeRanges(future);
 
     return <View style={[style, styles.container]}>
       <WeatherBorders ranges={ranges} style={{ position: 'absolute', top: 0}} />
-      {chart}
+      {areaChart}
       <WeatherIcons ranges={ranges} style={{ position: 'absolute', top: 0 }} />
       <View style={styles.chartItems}>{labels}</View>
     </View>;
