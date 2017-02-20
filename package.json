@@ -29,5 +29,6 @@
   },
   "jest": {
     "preset": "jest-react-native"
-  }
+  },
+  "license": "MIT"
 }
