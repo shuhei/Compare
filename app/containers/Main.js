@@ -48,7 +48,6 @@ function Main({
       future={future.weather}
       minTemperature={minTemperature}
       maxTemperature={maxTemperature}
-      style={[styles.chart]}
     />
     <View style={styles.footer}>
       <DateSelector

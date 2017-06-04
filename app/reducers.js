@@ -100,9 +100,7 @@ export type State = {
   location: Location,
   today: Date,
   future: Day,
-  futureDates: [Date],
   past: Day,
-  pastDates: [Date],
 };
 
 export default {

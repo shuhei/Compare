@@ -11,10 +11,8 @@ import {
 } from 'react-native';
 import {
   Path,
-  Group,
   Shape,
   Surface,
-  Transform
 } from 'ReactNativeART';
 
 import weatherIcons from '../icons';
@@ -27,7 +25,6 @@ const CHART_HEIGHT = 250;
 const UNIT_SIZE = CHART_WIDTH / 24;
 const ICON_SIZE = UNIT_SIZE * 1.6;
 
-const AnimatedGroup = Animated.createAnimatedComponent(Group);
 const AnimatedShape = Animated.createAnimatedComponent(Shape);
 
 type Props = {
@@ -201,7 +198,7 @@ export class HourlyChart extends Component {
       <WeatherBorders ranges={ranges} style={{ position: 'absolute', top: 0}} />
       {areaChart}
       <WeatherIcons ranges={ranges} style={{ position: 'absolute', top: 0 }} />
-      <View style={styles.chartItems}>{labels}</View>
+      <View style={styles.labels}>{labels}</View>
     </View>;
   }
 }
@@ -212,7 +209,7 @@ const styles = StyleSheet.create({
     height: CHART_HEIGHT + 25,
     justifyContent: 'flex-end'
   },
-  chartItems: {
+  labels: {
     alignItems: 'flex-end',
     flexDirection: 'row',
   },
