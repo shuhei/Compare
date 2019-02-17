@@ -2,6 +2,8 @@
 
 A super-simple app to compare temperatures of yesterday and today.
 
+[I ported this to Elm!](https://github.com/shuhei/elm-compare)
+
 ![Screenshot](/assets/animation.gif)
 
 ## Development
